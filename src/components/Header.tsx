@@ -16,13 +16,11 @@ const Header: FC = () => {
 	};
 
 	return (
-		<nav className='w-full min-h-[60px] flex items-center justify-between bg-green-500 shadow-lg text-white px-4 md:px-6 md:py-4 lg:px-8 lg:py-6'>
+		<nav className='w-full min-h-[60px] flex items-center justify-between bg-primary shadow-lg text-white px-4 md:px-6 md:py-4 lg:px-8 lg:py-6'>
 			{/* Brand Name */}
 			<Link href='/'>
 				<a>
-					<h1 className='text-xl md:text-2xl xl:text-3xl font-bold'>
-						Blog App
-					</h1>
+					<h1 className='typo-h1 font-bold'>Blog App</h1>
 				</a>
 			</Link>
 
@@ -38,11 +36,11 @@ const Header: FC = () => {
 					<ul className='space-y-4'>
 						<li className='flex space-x-3'>
 							<UserAddIcon className='w-6 h-6' />
-							<p>Sign Up</p>
+							<p className='typo-text'>Sign Up</p>
 						</li>
 						<li className='flex space-x-3'>
 							<LoginIcon className='w-6 h-6' />
-							<p>Sign In</p>
+							<p className='typo-text'>Sign In</p>
 						</li>
 					</ul>
 				</div>
@@ -50,10 +48,10 @@ const Header: FC = () => {
 
 			{/* Menu for large screens */}
 			<div className='space-x-6 hidden lg:block'>
-				<button className='px-6 py-2 bg-white text-green-500 rounded-lg font-medium text-lg'>
+				<button className='px-6 py-2 bg-white text-primary rounded-lg font-medium typo-text'>
 					Sign Up
 				</button>
-				<button className='font-medium text-lg'>Sign In</button>
+				<button className='font-medium typo-text'>Sign In</button>
 			</div>
 		</nav>
 	);

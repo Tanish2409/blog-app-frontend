@@ -13,10 +13,18 @@ module.exports = {
 				lg: '976px',
 				xl: '1440px',
 			},
+			colors: {
+				primary: {
+					DEFAULT: '#1D3557',
+				},
+				bground: {
+					DEFAULT: '#F1FAEE',
+				},
+			},
 		},
 	},
 	variants: {
 		extend: {},
 	},
-	plugins: [],
+	plugins: [require('@tailwindcss/forms')],
 };
