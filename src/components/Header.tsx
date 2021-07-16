@@ -13,7 +13,7 @@ const Header: FC = () => {
 
 	const [authModal, setAuthModal] = useState<{
 		isOpen: boolean;
-		type: IAuthModalProps['formType'];
+		type: IAuthModalProps['authType'];
 	}>({
 		isOpen: false,
 		type: 'register',
@@ -24,7 +24,7 @@ const Header: FC = () => {
 		setOpen(!open);
 	};
 
-	const openAuthModal = (type: IAuthModalProps['formType']): void => {
+	const openAuthModal = (type: IAuthModalProps['authType']): void => {
 		setAuthModal({
 			type,
 			isOpen: true,
@@ -41,7 +41,7 @@ const Header: FC = () => {
 	return (
 		<nav className='w-full min-h-[60px] flex items-center justify-between bg-primary shadow-lg text-white px-4 md:px-6 md:py-4 lg:px-8 lg:py-6'>
 			{authModal.isOpen ? (
-				<AuthModal formType={authModal.type} handleClose={closeAuthModal} />
+				<AuthModal authType={authModal.type} handleClose={closeAuthModal} />
 			) : null}
 
 			{/* Brand Name */}
