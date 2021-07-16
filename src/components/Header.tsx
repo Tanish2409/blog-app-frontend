@@ -6,17 +6,44 @@ import {
 	LoginIcon,
 } from '@heroicons/react/outline';
 import Link from 'next/link';
+import AuthModal, { IAuthModalProps } from './auth/AuthModal';
 
 const Header: FC = () => {
 	const [open, setOpen] = useState(false);
+
+	const [authModal, setAuthModal] = useState<{
+		isOpen: boolean;
+		type: IAuthModalProps['formType'];
+	}>({
+		isOpen: false,
+		type: 'register',
+	});
 
 	// toggle opening of side nav
 	const toggle = (): void => {
 		setOpen(!open);
 	};
 
+	const openAuthModal = (type: IAuthModalProps['formType']): void => {
+		setAuthModal({
+			type,
+			isOpen: true,
+		});
+	};
+
+	const closeAuthModal = (): void => {
+		setAuthModal({
+			...authModal,
+			isOpen: false,
+		});
+	};
+
 	return (
 		<nav className='w-full min-h-[60px] flex items-center justify-between bg-primary shadow-lg text-white px-4 md:px-6 md:py-4 lg:px-8 lg:py-6'>
+			{authModal.isOpen ? (
+				<AuthModal formType={authModal.type} handleClose={closeAuthModal} />
+			) : null}
+
 			{/* Brand Name */}
 			<Link href='/'>
 				<a>
@@ -25,22 +52,41 @@ const Header: FC = () => {
 			</Link>
 
 			{/* Menu Icon for small screens */}
-			<div className='w-6 h-6 lg:hidden'>
+			<div className='w-6 h-6 lg:hidden cursor-pointer'>
 				<MenuAlt3Icon onClick={toggle} />
 			</div>
 
 			{/* Side Menu for small screens */}
 			{open && (
 				<div className='absolute right-0 top-0 h-full min-w-[200px] bg-gray-100/70 backdrop-blur-sm text-gray-800 pt-16 px-4 shadow-2xl'>
-					<XIcon className='w-6 h-6 absolute top-4 right-4' onClick={toggle} />
+					<XIcon
+						className='w-6 h-6 absolute top-4 right-4 cursor-pointer'
+						onClick={toggle}
+					/>
 					<ul className='space-y-4'>
 						<li className='flex space-x-3'>
 							<UserAddIcon className='w-6 h-6' />
-							<p className='typo-text'>Sign Up</p>
+							<p
+								className='typo-text cursor-pointer'
+								onClick={() => {
+									openAuthModal('register');
+									setOpen(false);
+								}}
+							>
+								Register
+							</p>
 						</li>
 						<li className='flex space-x-3'>
 							<LoginIcon className='w-6 h-6' />
-							<p className='typo-text'>Sign In</p>
+							<p
+								className='typo-text cursor-pointer'
+								onClick={() => {
+									openAuthModal('login');
+									setOpen(false);
+								}}
+							>
+								Login
+							</p>
 						</li>
 					</ul>
 				</div>
@@ -48,10 +94,18 @@ const Header: FC = () => {
 
 			{/* Menu for large screens */}
 			<div className='space-x-6 hidden lg:block'>
-				<button className='px-6 py-2 bg-white text-primary rounded-lg font-medium typo-text'>
-					Sign Up
+				<button
+					className='px-6 py-2 bg-white text-primary rounded-lg font-medium typo-text'
+					onClick={() => openAuthModal('register')}
+				>
+					Register
 				</button>
-				<button className='font-medium typo-text'>Sign In</button>
+				<button
+					className='font-medium typo-text'
+					onClick={() => openAuthModal('login')}
+				>
+					Login
+				</button>
 			</div>
 		</nav>
 	);
