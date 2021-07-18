@@ -1,43 +1,20 @@
-// import {} from 'react-dom';
 import { createPortal } from 'react-dom';
-import axios from 'axios';
-import { ChangeEvent, FC, FormEvent, useState } from 'react';
+import { FC, useState } from 'react';
 import { ShieldCheckIcon, XIcon } from '@heroicons/react/outline';
+import {
+	FormFieldComponentProps,
+	handleFormSubmit,
+	handleInputChange,
+	IAuthModalState,
+	IAuthModalProps,
+	IFormField,
+	IAuthState,
+} from '../../types/auth.types';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAuthAction, getAuthState } from '../../redux/auth/slice';
 
-interface IFormField {
-	id: string;
-	type: string;
-	placeholder: string;
-}
-
-export interface IAuthFormState {
-	email?: string;
-	password: string;
-	name?: string;
-	username: string;
-	isSubmitting: boolean;
-	submitted: boolean;
-	error: {
-		isError: boolean;
-		message: string | string[];
-	};
-	authType: 'login' | 'register';
-}
-
-export interface IAuthModalProps extends Pick<IAuthFormState, 'authType'> {
-	handleClose: () => void;
-}
-
-export type handleInputChange = {
-	(event: ChangeEvent<HTMLInputElement>): void;
-};
-
-export type handleFormSubmit = {
-	(event: FormEvent<HTMLFormElement>): void;
-};
-
-const authForm = {
-	loginFormFields: [
+const authForm: Record<`${IAuthModalState['authType']}`, IFormField[]> = {
+	login: [
 		{
 			id: 'username',
 			type: 'text',
@@ -49,7 +26,7 @@ const authForm = {
 			placeholder: 'Password',
 		},
 	],
-	registerFormFields: [
+	register: [
 		{
 			id: 'name',
 			type: 'text',
@@ -74,19 +51,15 @@ const authForm = {
 };
 
 const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
-	const [formState, setFormState] = useState<IAuthFormState>({
+	const [formState, setFormState] = useState<IAuthModalState>({
 		name: '',
 		username: '',
 		email: '',
 		password: '',
-		isSubmitting: false,
-		submitted: false,
-		error: {
-			isError: false,
-			message: null,
-		},
 		authType,
 	});
+	const dispatch = useDispatch();
+	const authState = useSelector(getAuthState);
 
 	const handleChange: handleInputChange = (event) => {
 		setFormState({
@@ -95,60 +68,51 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 		});
 	};
 
+	const successCb = (): void => {
+		setFormState({
+			...formState,
+			name: '',
+			email: '',
+			username: '',
+			password: '',
+		});
+
+		setTimeout(handleClose, 500);
+	};
+
 	const handleSubmit: handleFormSubmit = async (event) => {
 		event.preventDefault();
 
-		setFormState({
-			...formState,
-			isSubmitting: true,
-			error: {
-				isError: false,
-				message: null,
-			},
-		});
+		const { name, password, username, email } = formState;
 
-		try {
-			const { name, password, username, email } = formState;
-
-			await axios.post(
-				`${process.env.NEXT_PUBLIC_API}/auth/${formState.authType}`,
-				{ name, password, username, email }
+		if (formState.authType === 'login') {
+			console.log('login');
+			const loginAction = getAuthAction(
+				'login',
+				{ password, username },
+				successCb
+			);
+			dispatch(loginAction());
+		} else if (formState.authType === 'register') {
+			console.log('register');
+			const registerAction = getAuthAction(
+				'register',
+				{
+					email,
+					name,
+					password,
+					username,
+				},
+				successCb
 			);
 
-			setFormState({
-				...formState,
-				name: '',
-				email: '',
-				username: '',
-				password: '',
-				isSubmitting: false,
-				submitted: true,
-				error: {
-					isError: false,
-					message: null,
-				},
-			});
-
-			setTimeout(handleClose, 500);
-		} catch (error) {
-			setFormState({
-				...formState,
-				isSubmitting: false,
-				error: {
-					isError: true,
-					message: error.response.data.message,
-				},
-			});
+			dispatch(registerAction());
 		}
 	};
 
 	const changeAuthType = (): void => {
 		setFormState({
 			...formState,
-			error: {
-				isError: false,
-				message: null,
-			},
 			authType: formState.authType === 'register' ? 'login' : 'register',
 		});
 	};
@@ -160,8 +124,8 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 				{/* Modal Close Icon */}
 				<XIcon
 					className={`absolute top-8 right-7 w-6 text-gray-500 cursor-pointer
-					${formState.isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-					onClick={formState.isSubmitting ? null : handleClose}
+					${authState.isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+					onClick={() => (authState.isLoading ? null : handleClose())}
 				/>
 
 				<h3 className='font-semibold text-primary tracking-wider typo-h2 uppercase mb-4'>
@@ -172,29 +136,29 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 					className='space-y-3 md:space-y-5 flex flex-col'
 					onSubmit={handleSubmit}
 				>
-					{authForm[`${formState.authType}FormFields`].map(
-						(formField: IFormField) => {
-							return (
-								<FormFieldComponent
-									key={formField.id}
-									formField={formField}
-									formState={formState}
-									handleChange={handleChange}
-								/>
-							);
-						}
-					)}
+					{authForm[formState.authType].map((formField: IFormField) => {
+						return (
+							<FormFieldComponent
+								key={formField.id}
+								formField={formField}
+								formState={formState}
+								handleChange={handleChange}
+							/>
+						);
+					})}
 
 					<button
-						disabled={formState.isSubmitting}
+						disabled={authState.isLoading}
 						type='submit'
 						className={`typo-text w-full bg-primary text-white py-4 rounded-xl uppercase font-bold tracking-widest disabled:bg-gray-400 disabled:cursor-not-allowed ${
-							formState.submitted ? 'bg-green-600' : ''
+							authState.isLoaded && !authState.error.isError
+								? 'bg-green-600'
+								: ''
 						}`}
 					>
-						{formState.submitted ? (
+						{authState.isLoaded && !authState.error.isError ? (
 							<ShieldCheckIcon className='w-8 mx-auto' />
-						) : formState.isSubmitting ? (
+						) : authState.isLoading ? (
 							'submitting'
 						) : (
 							'submit'
@@ -212,26 +176,20 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 
 						<span
 							className={`text-secondary ml-2 cursor-pointer ${
-								formState.isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer'
+								authState.isLoading ? 'cursor-not-allowed' : 'cursor-pointer'
 							} `}
-							onClick={formState.isSubmitting ? null : changeAuthType}
+							onClick={() => (authState.isLoading ? null : changeAuthType())}
 						>
 							{formState.authType === 'register' ? 'Login' : 'Register'}
 						</span>
 					</p>
 				</div>
 
-				{formState.error.isError && <ErrorComponent formState={formState} />}
+				{authState.error.isError && <ErrorComponent authState={authState} />}
 			</div>
 		</div>,
-		document.getElementById('modal')
+		document.getElementById('modal') as HTMLElement
 	);
-};
-
-type FormFieldComponentProps = {
-	formField: IFormField;
-	formState: IAuthFormState;
-	handleChange: handleInputChange;
 };
 
 const FormFieldComponent: FC<FormFieldComponentProps> = ({
@@ -256,12 +214,13 @@ const FormFieldComponent: FC<FormFieldComponentProps> = ({
 );
 
 const ErrorComponent: FC<{
-	formState: IAuthFormState;
-}> = ({ formState }) => {
+	authState: IAuthState;
+}> = ({ authState }) => {
 	return (
 		<div className='space-y-2 mt-5 bg-red-500 p-4 rounded-xl'>
-			{typeof formState.error.message === 'object' ? (
-				formState.error.message.map((mssg, idx) => (
+			{authState.error.message &&
+			typeof authState.error.message === 'object' ? (
+				authState.error.message.map((mssg, idx) => (
 					<p
 						key={idx}
 						className='typo-sub-text first-letter:uppercase relative before:absolute before:w-2 before:h-2 text-white'
@@ -271,7 +230,7 @@ const ErrorComponent: FC<{
 				))
 			) : (
 				<p className='typo-sub-text text-white'>
-					&bull; {formState.error.message}
+					&bull; {authState.error.message}
 				</p>
 			)}
 		</div>

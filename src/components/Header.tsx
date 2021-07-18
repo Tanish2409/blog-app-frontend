@@ -4,12 +4,20 @@ import {
 	XIcon,
 	UserAddIcon,
 	LoginIcon,
+	LogoutIcon,
 } from '@heroicons/react/outline';
 import Link from 'next/link';
-import AuthModal, { IAuthModalProps } from './auth/AuthModal';
+import AuthModal from './auth/AuthModal';
+import { IAuthModalProps } from '../types/auth.types';
+import AuthUtils from '../utils/auth.utils';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAuthState, logout } from '../redux/auth/slice';
 
 const Header: FC = () => {
 	const [open, setOpen] = useState(false);
+
+	const dispatch = useDispatch();
+	const authState = useSelector(getAuthState);
 
 	const [authModal, setAuthModal] = useState<{
 		isOpen: boolean;
@@ -64,48 +72,79 @@ const Header: FC = () => {
 						onClick={toggle}
 					/>
 					<ul className='space-y-4'>
-						<li className='flex space-x-3'>
-							<UserAddIcon className='w-6 h-6' />
-							<p
-								className='typo-text cursor-pointer'
-								onClick={() => {
-									openAuthModal('register');
-									setOpen(false);
-								}}
-							>
-								Register
-							</p>
-						</li>
-						<li className='flex space-x-3'>
-							<LoginIcon className='w-6 h-6' />
-							<p
-								className='typo-text cursor-pointer'
-								onClick={() => {
-									openAuthModal('login');
-									setOpen(false);
-								}}
-							>
-								Login
-							</p>
-						</li>
+						{authState.isAuthenticated ? (
+							<li className='flex space-x-3'>
+								<LogoutIcon className='w-6 h-6' />
+								<p
+									className='typo-text cursor-pointer'
+									onClick={() => {
+										AuthUtils.removeLocalStorage('auth_details');
+										setOpen(false);
+										dispatch(logout());
+									}}
+								>
+									Logout
+								</p>
+							</li>
+						) : (
+							<>
+								<li className='flex space-x-3'>
+									<UserAddIcon className='w-6 h-6' />
+									<p
+										className='typo-text cursor-pointer'
+										onClick={() => {
+											openAuthModal('register');
+											setOpen(false);
+										}}
+									>
+										Register
+									</p>
+								</li>
+								<li className='flex space-x-3'>
+									<LoginIcon className='w-6 h-6' />
+									<p
+										className='typo-text cursor-pointer'
+										onClick={() => {
+											openAuthModal('login');
+											setOpen(false);
+										}}
+									>
+										Login
+									</p>
+								</li>
+							</>
+						)}
 					</ul>
 				</div>
 			)}
 
 			{/* Menu for large screens */}
 			<div className='space-x-6 hidden lg:block'>
-				<button
-					className='px-6 py-2 bg-white text-primary rounded-lg font-medium typo-text'
-					onClick={() => openAuthModal('register')}
-				>
-					Register
-				</button>
-				<button
-					className='font-medium typo-text'
-					onClick={() => openAuthModal('login')}
-				>
-					Login
-				</button>
+				{authState.isAuthenticated ? (
+					<button
+						className='px-6 py-2 bg-white text-primary rounded-lg font-medium typo-text'
+						onClick={() => {
+							dispatch(logout());
+						}}
+					>
+						Logout
+					</button>
+				) : (
+					<>
+						<button
+							className='px-6 py-2 bg-white text-primary rounded-lg font-medium typo-text'
+							onClick={() => openAuthModal('register')}
+						>
+							Register
+						</button>
+						<button
+							className='font-medium typo-text'
+							onClick={() => openAuthModal('login')}
+						>
+							Login
+						</button>
+					</>
+				)}
 			</div>
 		</nav>
 	);
