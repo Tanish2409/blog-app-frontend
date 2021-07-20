@@ -9,9 +9,9 @@ import {
 	IAuthModalProps,
 	IFormField,
 	IAuthState,
-} from '../../types/auth.types';
+} from '@customTypes/auth.types';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAuthAction, getAuthState } from '../../redux/auth/slice';
+import { getAuthAction, getAuthState } from '@reduxActions/auth/slice';
 
 const authForm: Record<`${IAuthModalState['authType']}`, IFormField[]> = {
 	login: [

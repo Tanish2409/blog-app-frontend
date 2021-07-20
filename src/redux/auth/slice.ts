@@ -4,8 +4,8 @@ import {
 	IAuthModalState,
 	IAuthResponse,
 	IAuthState,
-} from '../../types/auth.types';
-import AuthUtils from '../../utils/auth.utils';
+} from '@customTypes/auth.types';
+import AuthUtils from '@utils/auth.utils';
 import { IGlobalState } from '../store';
 
 export const SERVER_URI = process.env.NEXT_PUBLIC_SERVER_URI;

@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { loaduser } from '../redux/auth/slice';
-import { store } from '../redux/store';
-import { ILocalStorage } from '../types/auth.types';
+import { loaduser } from '@reduxActions/auth/slice';
+import { store } from '@reduxActions/store';
+import { ILocalStorage } from '@customTypes/auth.types';
 
 class AuthUtils {
 	static setLocalStorage<T extends keyof ILocalStorage>(

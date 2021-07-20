@@ -8,10 +8,10 @@ import {
 } from '@heroicons/react/outline';
 import Link from 'next/link';
 import AuthModal from './auth/AuthModal';
-import { IAuthModalProps } from '../types/auth.types';
-import AuthUtils from '../utils/auth.utils';
+import { IAuthModalProps } from '@customTypes/auth.types';
+import AuthUtils from '@utils/auth.utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAuthState, logout } from '../redux/auth/slice';
+import { getAuthState, logout } from '@reduxActions/auth/slice';
 
 const Header: FC = () => {
 	const [open, setOpen] = useState(false);
