@@ -8,7 +8,7 @@ import {
 import AuthUtils from '../../utils/auth.utils';
 import { IGlobalState } from '../store';
 
-const SERVER_URI = process.env.NEXT_PUBLIC_SERVER_URI;
+export const SERVER_URI = process.env.NEXT_PUBLIC_SERVER_URI;
 
 const initialState: IAuthState = {
 	access_token: AuthUtils.getLocalStorage('auth_details')?.access_token,
@@ -22,6 +22,25 @@ const initialState: IAuthState = {
 	isLoaded: false,
 };
 
+/**
+ * @description - To load user using token in local storage on page refresh or fresh page visit
+ */
+const loaduser = createAsyncThunk(
+	'auth/loaduser',
+	async (_: void, { dispatch }) => {
+		try {
+			dispatch(request());
+			const { data }: { data: IAuthResponse } = await axios.get(
+				`${SERVER_URI}/user/me`
+			);
+
+			dispatch(success(data));
+		} catch (err) {
+			dispatch(error(null));
+		}
+	}
+);
+
 const authSlice = createSlice({
 	name: 'auth',
 	initialState,
@@ -31,6 +50,8 @@ const authSlice = createSlice({
 		 */
 		logout: (state) => {
 			AuthUtils.removeLocalStorage('auth_details');
+			AuthUtils.setAuthToken();
+
 			state.access_token = null;
 			state.error = {
 				isError: false,
@@ -61,6 +82,9 @@ const authSlice = createSlice({
 			state,
 			{ payload }: { payload: IAuthState['error']['message'] }
 		) => {
+			AuthUtils.removeLocalStorage('auth_details');
+			AuthUtils.setAuthToken();
+
 			state.access_token = null;
 			state.isAuthenticated = false;
 			state.error = {
@@ -76,6 +100,7 @@ const authSlice = createSlice({
 		 */
 		success: (state, { payload }: { payload: IAuthResponse }) => {
 			AuthUtils.setLocalStorage('auth_details', payload);
+			AuthUtils.setAuthToken();
 
 			state.access_token = payload.access_token;
 			state.isAuthenticated = true;
@@ -134,8 +159,6 @@ function getAuthAction<T extends IAuthModalState>(
 			},
 		};
 
-		console.log(data);
-
 		try {
 			dispatch(request());
 			const { data }: { data: IAuthResponse } = await axios.post(
@@ -143,10 +166,14 @@ function getAuthAction<T extends IAuthModalState>(
 				body,
 				config
 			);
+
 			successCb();
 			dispatch(success(data));
 		} catch (err) {
-			dispatch(error(err.response ? err.response.data.message : err.message));
+			const msg: string | string[] = err.response
+				? err.response.data.message
+				: err.message;
+			dispatch(error(msg));
 		}
 	});
 }
@@ -155,6 +182,6 @@ export function getAuthState(state: IGlobalState): IAuthState {
 	return state.auth;
 }
 
-export { error, logout, request, success, getAuthAction };
+export { error, logout, request, success, getAuthAction, loaduser };
 
 export const authReducer = authSlice.reducer;

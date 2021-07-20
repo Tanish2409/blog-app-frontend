@@ -86,7 +86,6 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 		const { name, password, username, email } = formState;
 
 		if (formState.authType === 'login') {
-			console.log('login');
 			const loginAction = getAuthAction(
 				'login',
 				{ password, username },
@@ -94,7 +93,6 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 			);
 			dispatch(loginAction());
 		} else if (formState.authType === 'register') {
-			console.log('register');
 			const registerAction = getAuthAction(
 				'register',
 				{
@@ -185,7 +183,9 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 					</p>
 				</div>
 
-				{authState.error.isError && <ErrorComponent authState={authState} />}
+				{authState.error.isError && authState.error.message && (
+					<ErrorComponent authState={authState} />
+				)}
 			</div>
 		</div>,
 		document.getElementById('modal') as HTMLElement

@@ -1,12 +1,17 @@
 import Head from 'next/head';
 import { AppProps } from 'next/app';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import Layout from '../components/Layout';
 import '../styles/globals.css';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store';
+import AuthUtils from '../utils/auth.utils';
 
 const MyApp: FC<AppProps> = ({ Component, pageProps }) => {
+	useEffect(() => {
+		AuthUtils.setAuthToken();
+		AuthUtils.authorize(store);
+	}, []);
 	return (
 		<Provider store={store}>
 			<Head>

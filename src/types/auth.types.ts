@@ -70,5 +70,5 @@ export type IAuthResponse = {
 };
 
 export type ILocalStorage = {
-	auth_details: IAuthResponse | null;
+	auth_details: IAuthResponse;
 };
