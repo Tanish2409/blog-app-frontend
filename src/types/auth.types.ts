@@ -56,7 +56,7 @@ export type IApiUser = {
 	_id: string;
 	name: string;
 	username: string;
-	role: string;
+	role: 'admin' | 'user';
 	email: string;
 	createdAt: string;
 	profile?: string;

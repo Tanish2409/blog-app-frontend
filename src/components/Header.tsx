@@ -5,6 +5,7 @@ import {
 	UserAddIcon,
 	LoginIcon,
 	LogoutIcon,
+	ViewGridIcon,
 } from '@heroicons/react/outline';
 import Link from 'next/link';
 import AuthModal from './auth/AuthModal';
@@ -73,19 +74,36 @@ const Header: FC = () => {
 					/>
 					<ul className='space-y-4'>
 						{authState.isAuthenticated ? (
-							<li className='flex space-x-3'>
-								<LogoutIcon className='w-6 h-6' />
-								<p
-									className='typo-text cursor-pointer'
-									onClick={() => {
-										AuthUtils.removeLocalStorage('auth_details');
-										setOpen(false);
-										dispatch(logout());
-									}}
-								>
-									Logout
-								</p>
-							</li>
+							<>
+								<Link href={`/${authState.user?.role}`}>
+									<a>
+										<li className='flex space-x-3'>
+											<ViewGridIcon className='w-6 h-6' />
+											<p
+												className='typo-text cursor-pointer'
+												onClick={() => {
+													setOpen(false);
+												}}
+											>
+												Dashboard
+											</p>
+										</li>
+									</a>
+								</Link>
+
+								<li className='flex space-x-3'>
+									<LogoutIcon className='w-6 h-6' />
+									<p
+										className='typo-text cursor-pointer'
+										onClick={() => {
+											setOpen(false);
+											dispatch(logout());
+										}}
+									>
+										Logout
+									</p>
+								</li>
+							</>
 						) : (
 							<>
 								<li className='flex space-x-3'>
@@ -121,14 +139,23 @@ const Header: FC = () => {
 			{/* Menu for large screens */}
 			<div className='space-x-6 hidden lg:block'>
 				{authState.isAuthenticated ? (
-					<button
-						className='px-6 py-2 bg-white text-primary rounded-lg font-medium typo-text'
-						onClick={() => {
-							dispatch(logout());
-						}}
-					>
-						Logout
-					</button>
+					<div className='flex items-center space-x-6'>
+						<Link href={`/${authState.user?.role}`}>
+							<a>
+								<div className='cursor-pointer'>
+									<p className='typo-text'>Dashboard</p>
+								</div>
+							</a>
+						</Link>
+						<button
+							className='px-6 py-2 bg-white text-primary rounded-lg font-medium typo-text'
+							onClick={() => {
+								dispatch(logout());
+							}}
+						>
+							Logout
+						</button>
+					</div>
 				) : (
 					<>
 						<button

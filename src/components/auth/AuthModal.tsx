@@ -9,9 +9,11 @@ import {
 	IAuthModalProps,
 	IFormField,
 	IAuthState,
+	IApiUser,
 } from '@customTypes/auth.types';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAuthAction, getAuthState } from '@reduxActions/auth/slice';
+import { useRouter } from 'next/router';
 
 const authForm: Record<`${IAuthModalState['authType']}`, IFormField[]> = {
 	login: [
@@ -60,6 +62,7 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 	});
 	const dispatch = useDispatch();
 	const authState = useSelector(getAuthState);
+	const router = useRouter();
 
 	const handleChange: handleInputChange = (event) => {
 		setFormState({
@@ -68,7 +71,7 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 		});
 	};
 
-	const successCb = (): void => {
+	const successCb = (role: IApiUser['role']): void => {
 		setFormState({
 			...formState,
 			name: '',
@@ -78,6 +81,8 @@ const AuthModal: FC<IAuthModalProps> = ({ authType, handleClose }) => {
 		});
 
 		setTimeout(handleClose, 500);
+
+		router.push(`/${role}`);
 	};
 
 	const handleSubmit: handleFormSubmit = async (event) => {

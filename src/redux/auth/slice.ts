@@ -1,6 +1,7 @@
 import { AsyncThunk, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios, { AxiosRequestConfig } from 'axios';
 import {
+	IApiUser,
 	IAuthModalState,
 	IAuthResponse,
 	IAuthState,
@@ -130,7 +131,7 @@ const { error, logout, request, success } = authSlice.actions;
 function getAuthAction(
 	type: 'register',
 	data: Pick<IAuthModalState, 'username' | 'email' | 'password' | 'name'>,
-	successCb: () => void
+	successCb: (role: IApiUser['role']) => void
 ): AsyncThunk<void, never, Record<string, never>>;
 /**
  * @description - To Login an user
@@ -141,7 +142,7 @@ function getAuthAction(
 function getAuthAction(
 	type: 'login',
 	data: Pick<IAuthModalState, 'username' | 'password'>,
-	successCb: () => void
+	successCb: (role: IApiUser['role']) => void
 ): AsyncThunk<void, never, Record<string, never>>;
 /**
  * @description - Get an auth action based on the type
@@ -149,7 +150,7 @@ function getAuthAction(
 function getAuthAction<T extends IAuthModalState>(
 	type: 'login' | 'register',
 	data: T,
-	successCb: () => void
+	successCb: (role: IApiUser['role']) => void
 ): AsyncThunk<void, never, Record<string, never>> {
 	return createAsyncThunk(`auth/${type}User`, async (_, { dispatch }) => {
 		const body = JSON.stringify(data);
@@ -167,8 +168,9 @@ function getAuthAction<T extends IAuthModalState>(
 				config
 			);
 
-			successCb();
 			dispatch(success(data));
+
+			successCb(data.user.role);
 		} catch (err) {
 			const msg: string | string[] = err.response
 				? err.response.data.message
